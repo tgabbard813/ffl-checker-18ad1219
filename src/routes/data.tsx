@@ -33,22 +33,6 @@ function formatDate(ts: number) {
   });
 }
 
-// ATF posts the prior month's list. Compute the URL slug as MMYY for
-// (currentMonth - 1). E.g. in June 2026 -> "0526" (May 2026).
-function latestAtfListUrl(now = new Date()): { url: string; label: string } {
-  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const mm = String(prev.getMonth() + 1).padStart(2, "0");
-  const yy = String(prev.getFullYear()).slice(-2);
-  const label = prev.toLocaleString(undefined, {
-    month: "long",
-    year: "numeric",
-  });
-  return {
-    url: `https://www.atf.gov/sites/default/files2/ffl/${mm}${yy}-ffl-list.csv`,
-    label,
-  };
-}
-
 function DataPage() {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [meta, setMeta] = useState<ImportMeta | null>(null);
@@ -99,41 +83,6 @@ function DataPage() {
     const text = await file.text();
     await importFromText(text, file.name);
   }
-
-  async function handleDownloadLatest() {
-    try {
-      setPhase({ kind: "parsing", rows: 0 });
-      const { url } = latestAtfListUrl();
-      const filename = url.split("/").pop() || "ffl-list.csv";
-      const csvRes = await fetch(url, { cache: "no-cache" });
-      if (!csvRes.ok) {
-        setPhase({
-          kind: "error",
-          message: `Couldn't download ${filename} from atf.gov (HTTP ${csvRes.status}). The file may not be published yet — try last month's or import manually.`,
-        });
-        return;
-      }
-      const text = await csvRes.text();
-      if (text.trim().split("\n").length < 2) {
-        setPhase({
-          kind: "error",
-          message: `${filename} appears empty. Try again later or import manually.`,
-        });
-        return;
-      }
-      await importFromText(text, filename);
-    } catch (err) {
-      setPhase({
-        kind: "error",
-        message:
-          err instanceof Error
-            ? `${err.message}. atf.gov may block cross-origin downloads — if so, download the CSV from atf.gov and import it manually below.`
-            : "Download failed. Check your connection and try again.",
-      });
-    }
-  }
-
-
 
   async function handleClear() {
     if (!confirm("Remove the imported FFL dataset?")) return;
@@ -224,17 +173,16 @@ function DataPage() {
             if (f) void handleFile(f);
           }}
         />
-        <button
-          disabled={busy}
-          onClick={() => void handleDownloadLatest()}
-          className="h-12 w-full rounded-lg bg-accent text-sm font-semibold text-accent-foreground transition-opacity active:opacity-80 disabled:opacity-50"
+        <a
+          href="https://www.atf.gov/firearms/tools-and-services-firearms-industry/federal-firearms-listings"
+          target="_blank"
+          rel="noreferrer"
+          className="grid h-12 w-full place-items-center rounded-lg bg-accent text-sm font-semibold text-accent-foreground transition-opacity active:opacity-80"
         >
-          {busy
-            ? "Working…"
-            : `Download ${latestAtfListUrl().label} list from ATF`}
-        </button>
+          Download latest FFL list from ATF
+        </a>
         <p className="mt-2 text-center text-[11px] text-muted-foreground">
-          Fetches the prior-month list directly from atf.gov.
+          Opens the ATF download page in a new tab.
         </p>
 
         <button

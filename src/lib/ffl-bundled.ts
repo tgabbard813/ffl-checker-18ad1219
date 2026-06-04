@@ -9,7 +9,7 @@ import {
 } from "./ffl-data";
 
 const MAX_RESULTS = 200;
-const CSV_URL = `${import.meta.env.BASE_URL}ffl-data.csv`;
+const CSV_URL = `${import.meta.env.BASE_URL}ffl-list.csv`;
 
 let cache: FflLicense[] | null = null;
 let loadPromise: Promise<FflLicense[] | null> | null = null;

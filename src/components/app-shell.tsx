@@ -68,6 +68,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             active={path.startsWith("/history")}
           />
           <NavItem
+            to="/data"
+            label="Data"
+            active={path.startsWith("/data")}
+          />
+          <NavItem
             to="/about"
             label="About"
             active={path.startsWith("/about")}

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as DataRouteImport } from './routes/data'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FflLicenseIdRouteImport } from './routes/ffl.$licenseId'
@@ -23,6 +24,11 @@ const ResultsRoute = ResultsRouteImport.update({
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataRoute = DataRouteImport.update({
+  id: '/data',
+  path: '/data',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -44,6 +50,7 @@ const FflLicenseIdRoute = FflLicenseIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/data': typeof DataRoute
   '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/data': typeof DataRoute
   '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
@@ -59,21 +67,36 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/data': typeof DataRoute
   '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/history' | '/results' | '/ffl/$licenseId'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/data'
+    | '/history'
+    | '/results'
+    | '/ffl/$licenseId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/history' | '/results' | '/ffl/$licenseId'
-  id: '__root__' | '/' | '/about' | '/history' | '/results' | '/ffl/$licenseId'
+  to: '/' | '/about' | '/data' | '/history' | '/results' | '/ffl/$licenseId'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/data'
+    | '/history'
+    | '/results'
+    | '/ffl/$licenseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  DataRoute: typeof DataRoute
   HistoryRoute: typeof HistoryRoute
   ResultsRoute: typeof ResultsRoute
   FflLicenseIdRoute: typeof FflLicenseIdRoute
@@ -93,6 +116,13 @@ declare module '@tanstack/react-router' {
       path: '/history'
       fullPath: '/history'
       preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data': {
+      id: '/data'
+      path: '/data'
+      fullPath: '/data'
+      preLoaderRoute: typeof DataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -122,6 +152,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  DataRoute: DataRoute,
   HistoryRoute: HistoryRoute,
   ResultsRoute: ResultsRoute,
   FflLicenseIdRoute: FflLicenseIdRoute,
@@ -129,3 +160,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

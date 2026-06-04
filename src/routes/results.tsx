@@ -102,11 +102,7 @@ function ResultsPage() {
             <p className="text-sm font-medium">No licenses found.</p>
             <p className="mt-2 text-sm text-muted-foreground">
               Double-check spelling, try fewer characters, or switch search
-              modes. Make sure you've imported the latest ATF data under{" "}
-              <Link to="/data" className="text-accent underline-offset-2 hover:underline">
-                Data
-              </Link>
-              .
+              modes.
             </p>
             <Link
               to="/"

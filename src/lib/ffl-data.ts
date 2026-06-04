@@ -2,7 +2,11 @@
 // CSV into IndexedDB (see ffl-db.ts). If no import has been done yet, we
 // fall back to a small sample dataset so the app is usable out of the box.
 
-import { searchAll, getById, hasImportedData } from "./ffl-db";
+import {
+  searchBundled,
+  getBundledById,
+  hasBundledData,
+} from "./ffl-bundled";
 
 export type FflLicense = {
   id: string; // full license number, e.g. "1-54-059-01-4K-07721"
@@ -113,16 +117,16 @@ export async function searchFfls(
 ): Promise<FflLicense[]> {
   const q = query.trim();
   if (!q) return [];
-  if (await hasImportedData()) {
-    return searchAll(q, mode);
+  if (await hasBundledData()) {
+    return searchBundled(q, mode);
   }
   return filterSample(q, mode);
 }
 
 export async function findFflById(id: string): Promise<FflLicense | undefined> {
   const norm = id.replace(/\s/g, "").toUpperCase();
-  if (await hasImportedData()) {
-    return getById(norm);
+  if (await hasBundledData()) {
+    return getBundledById(norm);
   }
   return SAMPLE_DATA.find((f) => f.id.toUpperCase() === norm);
 }

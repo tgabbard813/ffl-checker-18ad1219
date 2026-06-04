@@ -15,7 +15,6 @@ import { Route as DataRouteImport } from './routes/data'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FflLicenseIdRouteImport } from './routes/ffl.$licenseId'
-import { Route as ApiPublicAtfListRouteImport } from './routes/api/public/atf-list'
 
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
@@ -47,11 +46,6 @@ const FflLicenseIdRoute = FflLicenseIdRouteImport.update({
   path: '/ffl/$licenseId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicAtfListRoute = ApiPublicAtfListRouteImport.update({
-  id: '/api/public/atf-list',
-  path: '/api/public/atf-list',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,7 +54,6 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
-  '/api/public/atf-list': typeof ApiPublicAtfListRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,7 +62,6 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
-  '/api/public/atf-list': typeof ApiPublicAtfListRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,7 +71,6 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
-  '/api/public/atf-list': typeof ApiPublicAtfListRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,16 +81,8 @@ export interface FileRouteTypes {
     | '/history'
     | '/results'
     | '/ffl/$licenseId'
-    | '/api/public/atf-list'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/about'
-    | '/data'
-    | '/history'
-    | '/results'
-    | '/ffl/$licenseId'
-    | '/api/public/atf-list'
+  to: '/' | '/about' | '/data' | '/history' | '/results' | '/ffl/$licenseId'
   id:
     | '__root__'
     | '/'
@@ -108,7 +91,6 @@ export interface FileRouteTypes {
     | '/history'
     | '/results'
     | '/ffl/$licenseId'
-    | '/api/public/atf-list'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,7 +100,6 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   ResultsRoute: typeof ResultsRoute
   FflLicenseIdRoute: typeof FflLicenseIdRoute
-  ApiPublicAtfListRoute: typeof ApiPublicAtfListRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,13 +146,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FflLicenseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/atf-list': {
-      id: '/api/public/atf-list'
-      path: '/api/public/atf-list'
-      fullPath: '/api/public/atf-list'
-      preLoaderRoute: typeof ApiPublicAtfListRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -182,7 +156,6 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   ResultsRoute: ResultsRoute,
   FflLicenseIdRoute: FflLicenseIdRoute,
-  ApiPublicAtfListRoute: ApiPublicAtfListRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

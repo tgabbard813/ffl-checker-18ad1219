@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResultsRouteImport } from './routes/results'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FflLicenseIdRouteImport } from './routes/ffl.$licenseId'
 
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
   path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -31,30 +37,34 @@ const FflLicenseIdRoute = FflLicenseIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/results': typeof ResultsRoute
   '/ffl/$licenseId': typeof FflLicenseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/results' | '/ffl/$licenseId'
+  fullPaths: '/' | '/history' | '/results' | '/ffl/$licenseId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/results' | '/ffl/$licenseId'
-  id: '__root__' | '/' | '/results' | '/ffl/$licenseId'
+  to: '/' | '/history' | '/results' | '/ffl/$licenseId'
+  id: '__root__' | '/' | '/history' | '/results' | '/ffl/$licenseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HistoryRoute: typeof HistoryRoute
   ResultsRoute: typeof ResultsRoute
   FflLicenseIdRoute: typeof FflLicenseIdRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/results'
       fullPath: '/results'
       preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HistoryRoute: HistoryRoute,
   ResultsRoute: ResultsRoute,
   FflLicenseIdRoute: FflLicenseIdRoute,
 }

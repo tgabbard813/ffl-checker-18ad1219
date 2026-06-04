@@ -37,7 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="relative mx-auto flex min-h-screen max-w-[440px] flex-col bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/85 px-5 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border bg-background px-5 pt-3 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-0.5">
             <span className="font-mono text-[10px] font-medium tracking-[0.22em] text-muted-foreground uppercase">
@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="flex-1 pb-24">{children}</main>
 
       {/* Bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[440px] border-t border-border bg-background/90 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] backdrop-blur-md">
+      <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[440px] border-t border-border bg-background px-2 pb-2">
         <div className="flex">
           <NavItem to="/" label="Search" active={path === "/"} />
           <NavItem

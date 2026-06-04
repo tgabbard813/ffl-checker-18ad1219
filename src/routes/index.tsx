@@ -117,6 +117,18 @@ function HomePage() {
         </form>
       </section>
 
+      {/* Disclaimer */}
+      <section className="mx-5 mb-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
+        <p className="text-xs leading-relaxed text-accent">
+          <span className="font-bold">Note:</span> Before searching, visit the{" "}
+          <Link to="/data" className="underline underline-offset-2 hover:opacity-80">
+            Data
+          </Link>{" "}
+          tab to download the latest ATF FFL CSV file and import it. Search
+          results depend on having current data loaded.
+        </p>
+      </section>
+
       {/* Recent history */}
       <section className="border-t border-border px-5 py-6">
         <div className="mb-3 flex items-center justify-between">
@@ -165,6 +177,13 @@ function HomePage() {
           </ul>
         )}
       </section>
+
+      {/* Copyright */}
+      <div className="py-6 text-center">
+        <p className="text-[11px] text-muted-foreground">
+          © 2026 ffl-check.com
+        </p>
+      </div>
     </AppShell>
   );
 }

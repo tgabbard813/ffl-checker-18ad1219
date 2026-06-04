@@ -173,17 +173,16 @@ function DataPage() {
             if (f) void handleFile(f);
           }}
         />
-        <button
-          disabled={busy}
-          onClick={() => void handleDownloadLatest()}
-          className="h-12 w-full rounded-lg bg-accent text-sm font-semibold text-accent-foreground transition-opacity active:opacity-80 disabled:opacity-50"
+        <a
+          href="https://www.atf.gov/firearms/tools-and-services-firearms-industry/federal-firearms-listings"
+          target="_blank"
+          rel="noreferrer"
+          className="grid h-12 w-full place-items-center rounded-lg bg-accent text-sm font-semibold text-accent-foreground transition-opacity active:opacity-80"
         >
-          {busy
-            ? "Working…"
-            : `Download ${latestAtfListUrl().label} list from ATF`}
-        </button>
+          Download latest FFL list from ATF
+        </a>
         <p className="mt-2 text-center text-[11px] text-muted-foreground">
-          Fetches the prior-month list directly from atf.gov.
+          Opens the ATF download page in a new tab.
         </p>
 
         <button

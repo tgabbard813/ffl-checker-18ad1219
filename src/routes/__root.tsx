@@ -6,71 +6,6 @@ import {
   HeadContent,
 } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-
-function MobileErrorOverlay() {
-  const [errors, setErrors] = useState<string[]>([]);
-  useEffect(() => {
-    const push = (msg: string) =>
-      setErrors((prev) => (prev.length > 8 ? prev : [...prev, msg]));
-    const onError = (e: ErrorEvent) => {
-      push(
-        `Error: ${e.message}\n  at ${e.filename ?? "?"}:${e.lineno ?? "?"}:${e.colno ?? "?"}`,
-      );
-    };
-    const onRejection = (e: PromiseRejectionEvent) => {
-      const r = e.reason;
-      const msg =
-        r instanceof Error
-          ? `${r.name}: ${r.message}\n${r.stack ?? ""}`
-          : typeof r === "string"
-            ? r
-            : JSON.stringify(r);
-      push(`Unhandled rejection: ${msg}`);
-    };
-    window.addEventListener("error", onError);
-    window.addEventListener("unhandledrejection", onRejection);
-    return () => {
-      window.removeEventListener("error", onError);
-      window.removeEventListener("unhandledrejection", onRejection);
-    };
-  }, []);
-  if (errors.length === 0) return null;
-  return (
-    <div
-      style={{
-        position: "fixed",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 99999,
-        background: "rgba(180,0,0,0.95)",
-        color: "white",
-        font: "12px/1.4 ui-monospace, monospace",
-        padding: "8px 10px",
-        maxHeight: "50vh",
-        overflow: "auto",
-        whiteSpace: "pre-wrap",
-        wordBreak: "break-word",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-        <strong>JS errors ({errors.length})</strong>
-        <button
-          onClick={() => setErrors([])}
-          style={{ background: "transparent", color: "white", border: "1px solid white", padding: "2px 6px", borderRadius: 4 }}
-        >
-          clear
-        </button>
-      </div>
-      {errors.map((e, i) => (
-        <div key={i} style={{ borderTop: i ? "1px solid rgba(255,255,255,0.3)" : "none", paddingTop: i ? 4 : 0, marginTop: i ? 4 : 0 }}>
-          {e}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function NotFoundComponent() {
   return (
@@ -157,7 +92,6 @@ function RootComponent() {
     <>
       <HeadContent />
       <Outlet />
-      <MobileErrorOverlay />
     </>
   );
 }

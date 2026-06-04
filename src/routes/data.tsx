@@ -33,6 +33,22 @@ function formatDate(ts: number) {
   });
 }
 
+// ATF posts the prior month's list. Compute the URL slug as MMYY for
+// (currentMonth - 1). E.g. in June 2026 -> "0526" (May 2026).
+function latestAtfListUrl(now = new Date()): { url: string; label: string } {
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const mm = String(prev.getMonth() + 1).padStart(2, "0");
+  const yy = String(prev.getFullYear()).slice(-2);
+  const label = prev.toLocaleString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+  return {
+    url: `https://www.atf.gov/sites/default/files2/ffl/${mm}${yy}-ffl-list.csv`,
+    label,
+  };
+}
+
 function DataPage() {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [meta, setMeta] = useState<ImportMeta | null>(null);

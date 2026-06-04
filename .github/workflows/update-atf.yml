@@ -1,0 +1,62 @@
+name: Update ATF FFL List
+
+on:
+  schedule:
+    # 1st of every month at 12:00 UTC
+    - cron: "0 12 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download latest available ATF list
+        id: fetch
+        run: |
+          set -e
+          UA="Mozilla/5.0 (compatible; ffl-checker-bot/1.0; +https://github.com/${{ github.repository }})"
+          # Try the prior month first, then walk back up to 4 months in case ATF is late.
+          for offset in 1 2 3 4; do
+            slug=$(date -u -d "$(date -u +%Y-%m-01) -${offset} month" +%m%y)
+            month=$(date -u -d "$(date -u +%Y-%m-01) -${offset} month" +%m)
+            year=$(date -u -d "$(date -u +%Y-%m-01) -${offset} month" +%Y)
+            url="https://www.atf.gov/sites/default/files2/ffl/${slug}-ffl-list.csv"
+            echo "Trying $url"
+            status=$(curl -A "$UA" -L -o public/ffl-list.csv -w "%{http_code}" "$url" || echo 000)
+            if [ "$status" = "200" ] && [ -s public/ffl-list.csv ]; then
+              echo "Got it: $slug"
+              rows=$(($(wc -l < public/ffl-list.csv) - 1))
+              cat > public/ffl-list.json <<EOF
+          {
+            "slug": "${slug}",
+            "month": ${month#0},
+            "year": ${year},
+            "fetchedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "rows": ${rows},
+            "source": "${url}"
+          }
+          EOF
+              echo "updated=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "No ATF list available in the last 4 months. Skipping."
+          echo "updated=false" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        if: steps.fetch.outputs.updated == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/ffl-list.csv public/ffl-list.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore(atf): refresh FFL list"
+            git push
+          fi

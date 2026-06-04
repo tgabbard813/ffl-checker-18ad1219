@@ -22,11 +22,7 @@ function NotFoundLicense({ licenseId }: { licenseId: string }) {
           {licenseId}
         </p>
         <p className="mt-3 text-xs text-muted-foreground">
-          If this license should exist, import the latest ATF dataset under{" "}
-          <Link to="/data" className="text-accent underline-offset-2 hover:underline">
-            Data
-          </Link>
-          .
+          If this license should exist, the dataset may be outdated.
         </p>
         <Link
           to="/"

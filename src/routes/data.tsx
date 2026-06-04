@@ -33,6 +33,22 @@ function formatDate(ts: number) {
   });
 }
 
+// ATF posts the prior month's list. Compute the URL slug as MMYY for
+// (currentMonth - 1). E.g. in June 2026 -> "0526" (May 2026).
+function latestAtfListUrl(now = new Date()): { url: string; label: string } {
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const mm = String(prev.getMonth() + 1).padStart(2, "0");
+  const yy = String(prev.getFullYear()).slice(-2);
+  const label = prev.toLocaleString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+  return {
+    url: `https://www.atf.gov/sites/default/files2/ffl/${mm}${yy}-ffl-list.csv`,
+    label,
+  };
+}
+
 function DataPage() {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [meta, setMeta] = useState<ImportMeta | null>(null);
@@ -42,11 +58,10 @@ function DataPage() {
     getImportMeta().then(setMeta);
   }, [phase]);
 
-  async function handleFile(file: File) {
+  async function importFromText(text: string, sourceName: string) {
     const started = performance.now();
     try {
       setPhase({ kind: "parsing", rows: 0 });
-      const text = await file.text();
       const { rows, skipped } = await parseFflCsv(text, (rowsParsed) =>
         setPhase({ kind: "parsing", rows: rowsParsed }),
       );
@@ -59,7 +74,7 @@ function DataPage() {
         return;
       }
       setPhase({ kind: "importing", inserted: 0, total: rows.length });
-      await bulkImport(rows, { sourceName: file.name }, (p) =>
+      await bulkImport(rows, { sourceName }, (p) =>
         setPhase({
           kind: "importing",
           inserted: p.inserted,
@@ -76,6 +91,42 @@ function DataPage() {
       setPhase({
         kind: "error",
         message: err instanceof Error ? err.message : "Import failed.",
+      });
+    }
+  }
+
+  async function handleFile(file: File) {
+    const text = await file.text();
+    await importFromText(text, file.name);
+  }
+
+  async function handleDownloadLatest() {
+    const { url, label } = latestAtfListUrl();
+    const slug = url.match(/(\d{4})-ffl-list\.csv$/)?.[1] ?? "";
+    try {
+      setPhase({ kind: "parsing", rows: 0 });
+      const res = await fetch(`/api/public/atf-list?slug=${slug}`);
+      if (!res.ok) {
+        const msg = await res.text().catch(() => "");
+        setPhase({
+          kind: "error",
+          message:
+            res.status === 404
+              ? `ATF hasn't posted the ${label} list yet. Try again in a few days or import manually.`
+              : msg ||
+                `Couldn't download from ATF (HTTP ${res.status}). Try again or import manually.`,
+        });
+        return;
+      }
+      const text = await res.text();
+      await importFromText(text, `${slug}-ffl-list.csv (${label})`);
+    } catch (err) {
+      setPhase({
+        kind: "error",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Download failed. Check your connection and try again.",
       });
     }
   }
@@ -171,10 +222,23 @@ function DataPage() {
         />
         <button
           disabled={busy}
-          onClick={() => fileRef.current?.click()}
+          onClick={() => void handleDownloadLatest()}
           className="h-12 w-full rounded-lg bg-accent text-sm font-semibold text-accent-foreground transition-opacity active:opacity-80 disabled:opacity-50"
         >
-          {meta ? "Replace with new CSV" : "Import ATF CSV"}
+          {busy
+            ? "Working…"
+            : `Download ${latestAtfListUrl().label} list from ATF`}
+        </button>
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          Fetches the prior-month list directly from atf.gov.
+        </p>
+
+        <button
+          disabled={busy}
+          onClick={() => fileRef.current?.click()}
+          className="mt-3 h-11 w-full rounded-lg border border-border bg-surface text-sm font-medium text-foreground/90 transition-colors active:bg-surface-elevated disabled:opacity-50"
+        >
+          Or import a CSV from this device
         </button>
 
         {meta && !busy && (

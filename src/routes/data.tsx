@@ -58,11 +58,10 @@ function DataPage() {
     getImportMeta().then(setMeta);
   }, [phase]);
 
-  async function handleFile(file: File) {
+  async function importFromText(text: string, sourceName: string) {
     const started = performance.now();
     try {
       setPhase({ kind: "parsing", rows: 0 });
-      const text = await file.text();
       const { rows, skipped } = await parseFflCsv(text, (rowsParsed) =>
         setPhase({ kind: "parsing", rows: rowsParsed }),
       );
@@ -75,7 +74,7 @@ function DataPage() {
         return;
       }
       setPhase({ kind: "importing", inserted: 0, total: rows.length });
-      await bulkImport(rows, { sourceName: file.name }, (p) =>
+      await bulkImport(rows, { sourceName }, (p) =>
         setPhase({
           kind: "importing",
           inserted: p.inserted,
@@ -92,6 +91,42 @@ function DataPage() {
       setPhase({
         kind: "error",
         message: err instanceof Error ? err.message : "Import failed.",
+      });
+    }
+  }
+
+  async function handleFile(file: File) {
+    const text = await file.text();
+    await importFromText(text, file.name);
+  }
+
+  async function handleDownloadLatest() {
+    const { url, label } = latestAtfListUrl();
+    const slug = url.match(/(\d{4})-ffl-list\.csv$/)?.[1] ?? "";
+    try {
+      setPhase({ kind: "parsing", rows: 0 });
+      const res = await fetch(`/api/public/atf-list?slug=${slug}`);
+      if (!res.ok) {
+        const msg = await res.text().catch(() => "");
+        setPhase({
+          kind: "error",
+          message:
+            res.status === 404
+              ? `ATF hasn't posted the ${label} list yet. Try again in a few days or import manually.`
+              : msg ||
+                `Couldn't download from ATF (HTTP ${res.status}). Try again or import manually.`,
+        });
+        return;
+      }
+      const text = await res.text();
+      await importFromText(text, `${slug}-ffl-list.csv (${label})`);
+    } catch (err) {
+      setPhase({
+        kind: "error",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Download failed. Check your connection and try again.",
       });
     }
   }

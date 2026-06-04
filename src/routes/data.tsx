@@ -101,25 +101,35 @@ function DataPage() {
   }
 
   async function handleDownloadLatest() {
-    const { url, label } = latestAtfListUrl();
-    const slug = url.match(/(\d{4})-ffl-list\.csv$/)?.[1] ?? "";
     try {
       setPhase({ kind: "parsing", rows: 0 });
-      const res = await fetch(`/api/public/atf-list?slug=${slug}`);
-      if (!res.ok) {
-        const msg = await res.text().catch(() => "");
+      const base = import.meta.env.BASE_URL;
+      const [csvRes, manifestRes] = await Promise.all([
+        fetch(`${base}ffl-list.csv`, { cache: "no-cache" }),
+        fetch(`${base}ffl-list.json`, { cache: "no-cache" }).catch(() => null),
+      ]);
+      if (!csvRes.ok) {
         setPhase({
           kind: "error",
-          message:
-            res.status === 404
-              ? `ATF hasn't posted the ${label} list yet. Try again in a few days or import manually.`
-              : msg ||
-                `Couldn't download from ATF (HTTP ${res.status}). Try again or import manually.`,
+          message: `Couldn't load the bundled ATF list (HTTP ${csvRes.status}). Try again or import manually.`,
         });
         return;
       }
-      const text = await res.text();
-      await importFromText(text, `${slug}-ffl-list.csv (${label})`);
+      const text = await csvRes.text();
+      if (text.trim().split("\n").length < 2) {
+        setPhase({
+          kind: "error",
+          message:
+            "No ATF data has been published yet. The monthly updater hasn't run — import a CSV manually for now.",
+        });
+        return;
+      }
+      let label = "ATF list";
+      if (manifestRes && manifestRes.ok) {
+        const m = await manifestRes.json().catch(() => null);
+        if (m?.slug) label = `${m.slug}-ffl-list.csv`;
+      }
+      await importFromText(text, label);
     } catch (err) {
       setPhase({
         kind: "error",
@@ -130,6 +140,7 @@ function DataPage() {
       });
     }
   }
+
 
   async function handleClear() {
     if (!confirm("Remove the imported FFL dataset?")) return;

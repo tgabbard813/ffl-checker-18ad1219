@@ -222,10 +222,23 @@ function DataPage() {
         />
         <button
           disabled={busy}
-          onClick={() => fileRef.current?.click()}
+          onClick={() => void handleDownloadLatest()}
           className="h-12 w-full rounded-lg bg-accent text-sm font-semibold text-accent-foreground transition-opacity active:opacity-80 disabled:opacity-50"
         >
-          {meta ? "Replace with new CSV" : "Import ATF CSV"}
+          {busy
+            ? "Working…"
+            : `Download ${latestAtfListUrl().label} list from ATF`}
+        </button>
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          Fetches the prior-month list directly from atf.gov.
+        </p>
+
+        <button
+          disabled={busy}
+          onClick={() => fileRef.current?.click()}
+          className="mt-3 h-11 w-full rounded-lg border border-border bg-surface text-sm font-medium text-foreground/90 transition-colors active:bg-surface-elevated disabled:opacity-50"
+        >
+          Or import a CSV from this device
         </button>
 
         {meta && !busy && (

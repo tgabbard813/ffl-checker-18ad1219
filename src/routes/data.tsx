@@ -84,41 +84,6 @@ function DataPage() {
     await importFromText(text, file.name);
   }
 
-  async function handleDownloadLatest() {
-    try {
-      setPhase({ kind: "parsing", rows: 0 });
-      const { url } = latestAtfListUrl();
-      const filename = url.split("/").pop() || "ffl-list.csv";
-      const csvRes = await fetch(url, { cache: "no-cache" });
-      if (!csvRes.ok) {
-        setPhase({
-          kind: "error",
-          message: `Couldn't download ${filename} from atf.gov (HTTP ${csvRes.status}). The file may not be published yet — try last month's or import manually.`,
-        });
-        return;
-      }
-      const text = await csvRes.text();
-      if (text.trim().split("\n").length < 2) {
-        setPhase({
-          kind: "error",
-          message: `${filename} appears empty. Try again later or import manually.`,
-        });
-        return;
-      }
-      await importFromText(text, filename);
-    } catch (err) {
-      setPhase({
-        kind: "error",
-        message:
-          err instanceof Error
-            ? `${err.message}. atf.gov may block cross-origin downloads — if so, download the CSV from atf.gov and import it manually below.`
-            : "Download failed. Check your connection and try again.",
-      });
-    }
-  }
-
-
-
   async function handleClear() {
     if (!confirm("Remove the imported FFL dataset?")) return;
     await clearAll();

@@ -1,7 +1,8 @@
 {
-  "month": null,
-  "year": null,
-  "fetchedAt": null,
-  "slug": null,
-  "rows": 0
+  "slug": "0526",
+  "month": 5,
+  "year": 2026,
+  "fetchedAt": "2026-06-04T00:00:00Z",
+  "rows": 77514,
+  "source": "manual-upload"
 }

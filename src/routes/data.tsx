@@ -84,6 +84,29 @@ function DataPage() {
     await importFromText(text, file.name);
   }
 
+  async function handleBundled() {
+    try {
+      setPhase({ kind: "parsing", rows: 0 });
+      const [csvRes, metaRes] = await Promise.all([
+        fetch("/ffl-list.csv", { cache: "no-store" }),
+        fetch("/ffl-list.json", { cache: "no-store" }).catch(() => null),
+      ]);
+      if (!csvRes.ok) throw new Error(`Bundled CSV not found (${csvRes.status})`);
+      const text = await csvRes.text();
+      let name = "bundled ffl-list.csv";
+      if (metaRes && metaRes.ok) {
+        const m = await metaRes.json().catch(() => null);
+        if (m?.slug) name = `bundled ${m.slug}-ffl-list.csv`;
+      }
+      await importFromText(text, name);
+    } catch (err) {
+      setPhase({
+        kind: "error",
+        message: err instanceof Error ? err.message : "Could not load bundled CSV.",
+      });
+    }
+  }
+
   async function handleClear() {
     if (!confirm("Remove the imported FFL dataset?")) return;
     await clearAll();
@@ -173,24 +196,32 @@ function DataPage() {
             if (f) void handleFile(f);
           }}
         />
+        <button
+          disabled={busy}
+          onClick={handleBundled}
+          className="grid h-12 w-full place-items-center rounded-lg bg-accent text-sm font-semibold text-accent-foreground transition-opacity active:opacity-80 disabled:opacity-50"
+        >
+          Load bundled ATF list (latest)
+        </button>
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          One-tap import of the CSV shipped with the app.
+        </p>
+
         <a
           href="https://www.atf.gov/firearms/tools-and-services-firearms-industry/federal-firearms-listings"
           target="_blank"
           rel="noreferrer"
-          className="grid h-12 w-full place-items-center rounded-lg bg-accent text-sm font-semibold text-accent-foreground transition-opacity active:opacity-80"
+          className="mt-3 grid h-11 w-full place-items-center rounded-lg border border-border bg-surface text-sm font-medium text-foreground/90 transition-colors active:bg-surface-elevated"
         >
-          Download latest FFL list from ATF
+          Download latest from ATF
         </a>
-        <p className="mt-2 text-center text-[11px] text-muted-foreground">
-          Opens the ATF download page in a new tab.
-        </p>
 
         <button
           disabled={busy}
           onClick={() => fileRef.current?.click()}
-          className="mt-3 h-11 w-full rounded-lg border border-border bg-surface text-sm font-medium text-foreground/90 transition-colors active:bg-surface-elevated disabled:opacity-50"
+          className="mt-2 h-11 w-full rounded-lg border border-border bg-surface text-sm font-medium text-foreground/90 transition-colors active:bg-surface-elevated disabled:opacity-50"
         >
-          Or import a CSV from this device
+          Import a CSV from this device
         </button>
 
         {meta && !busy && (

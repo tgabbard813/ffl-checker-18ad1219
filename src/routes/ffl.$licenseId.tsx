@@ -1,41 +1,16 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
-import { findFflById } from "@/lib/ffl-data";
+import { findFflById, type FflLicense } from "@/lib/ffl-data";
 
 export const Route = createFileRoute("/ffl/$licenseId")({
-  loader: async ({ params }) => {
-    const ffl = await findFflById(params.licenseId);
-    if (!ffl) throw notFound();
-    return { ffl };
-  },
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.ffl.businessName} — FFL ${loaderData.ffl.id}`
-          : "License — FFL Registry",
-      },
-    ],
+  head: ({ params }) => ({
+    meta: [{ title: `License ${params.licenseId} — FFL Registry` }],
   }),
-  notFoundComponent: NotFoundLicense,
-  errorComponent: ({ error }) => (
-    <AppShell>
-      <div className="px-5 py-10 text-center">
-        <p className="text-sm text-destructive">{error.message}</p>
-        <Link
-          to="/"
-          className="mt-4 inline-block text-sm font-semibold text-accent"
-        >
-          Back to search
-        </Link>
-      </div>
-    </AppShell>
-  ),
   component: LicenseDetailPage,
 });
 
-function NotFoundLicense() {
-  const { licenseId } = Route.useParams();
+function NotFoundLicense({ licenseId }: { licenseId: string }) {
   return (
     <AppShell>
       <div className="px-5 py-10 text-center">
@@ -45,6 +20,13 @@ function NotFoundLicense() {
         <h2 className="mt-2 text-lg font-semibold">License not found</h2>
         <p className="mt-2 break-all font-mono text-xs text-muted-foreground">
           {licenseId}
+        </p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          If this license should exist, import the latest ATF dataset under{" "}
+          <Link to="/data" className="text-accent underline-offset-2 hover:underline">
+            Data
+          </Link>
+          .
         </p>
         <Link
           to="/"
@@ -58,6 +40,7 @@ function NotFoundLicense() {
 }
 
 function formatLong(iso: string) {
+  if (!iso) return "—";
   return new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -77,7 +60,30 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 function LicenseDetailPage() {
-  const { ffl } = Route.useLoaderData();
+  const { licenseId } = Route.useParams();
+  const { data, isLoading } = useQuery({
+    queryKey: ["ffl", licenseId],
+    queryFn: () => findFflById(licenseId),
+  });
+
+  if (isLoading) {
+    return (
+      <AppShell>
+        <div className="px-5 py-10">
+          <div className="h-6 w-32 animate-pulse rounded bg-surface" />
+          <div className="mt-4 h-16 animate-pulse rounded-xl bg-surface" />
+          <div className="mt-4 h-64 animate-pulse rounded-2xl bg-surface" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!data) return <NotFoundLicense licenseId={licenseId} />;
+
+  return <DetailView ffl={data} />;
+}
+
+function DetailView({ ffl }: { ffl: FflLicense }) {
   const isActive = ffl.status === "active";
 
   async function copyAll() {
@@ -114,7 +120,6 @@ function LicenseDetailPage() {
         </Link>
       </div>
 
-      {/* Status banner */}
       <section className="px-5 pt-4">
         <div
           className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
@@ -144,7 +149,6 @@ function LicenseDetailPage() {
         </div>
       </section>
 
-      {/* Header */}
       <section className="px-5 pt-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           License Type {ffl.licenseType} · {ffl.licenseTypeName}
@@ -159,7 +163,6 @@ function LicenseDetailPage() {
         )}
       </section>
 
-      {/* Detail card */}
       <section className="mx-5 mt-5 rounded-2xl border border-border bg-surface p-5">
         <div className="grid grid-cols-2 gap-x-4 gap-y-5">
           <div className="col-span-2">
@@ -180,7 +183,7 @@ function LicenseDetailPage() {
               }
             />
           </div>
-          <Field label="County" value={ffl.county} />
+          <Field label="County code" value={ffl.county || "—"} />
           <Field label="Expires" value={formatLong(ffl.expirationDate)} />
           {ffl.phone && (
             <div className="col-span-2">

@@ -103,15 +103,13 @@ function DataPage() {
   async function handleDownloadLatest() {
     try {
       setPhase({ kind: "parsing", rows: 0 });
-      const base = import.meta.env.BASE_URL;
-      const [csvRes, manifestRes] = await Promise.all([
-        fetch(`${base}ffl-list.csv`, { cache: "no-cache" }),
-        fetch(`${base}ffl-list.json`, { cache: "no-cache" }).catch(() => null),
-      ]);
+      const { url } = latestAtfListUrl();
+      const filename = url.split("/").pop() || "ffl-list.csv";
+      const csvRes = await fetch(url, { cache: "no-cache" });
       if (!csvRes.ok) {
         setPhase({
           kind: "error",
-          message: `Couldn't load the bundled ATF list (HTTP ${csvRes.status}). Try again or import manually.`,
+          message: `Couldn't download ${filename} from atf.gov (HTTP ${csvRes.status}). The file may not be published yet — try last month's or import manually.`,
         });
         return;
       }
@@ -119,27 +117,22 @@ function DataPage() {
       if (text.trim().split("\n").length < 2) {
         setPhase({
           kind: "error",
-          message:
-            "No ATF data has been published yet. The monthly updater hasn't run — import a CSV manually for now.",
+          message: `${filename} appears empty. Try again later or import manually.`,
         });
         return;
       }
-      let label = "ATF list";
-      if (manifestRes && manifestRes.ok) {
-        const m = await manifestRes.json().catch(() => null);
-        if (m?.slug) label = `${m.slug}-ffl-list.csv`;
-      }
-      await importFromText(text, label);
+      await importFromText(text, filename);
     } catch (err) {
       setPhase({
         kind: "error",
         message:
           err instanceof Error
-            ? err.message
+            ? `${err.message}. atf.gov may block cross-origin downloads — if so, download the CSV from atf.gov and import it manually below.`
             : "Download failed. Check your connection and try again.",
       });
     }
   }
+
 
 
   async function handleClear() {

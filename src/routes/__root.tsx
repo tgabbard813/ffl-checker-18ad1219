@@ -76,15 +76,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      {
+        name: "viewport",
+        content:
+          "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
+      },
+      { name: "theme-color", content: "#1a1d24" },
+      { title: "FFL Registry — Verify Federal Firearms Licenses" },
+      {
+        name: "description",
+        content:
+          "Search the ATF Federal Firearms License directory by business name, license number, or location. View public license details and keep a local history of searches.",
+      },
+      { property: "og:title", content: "FFL Registry" },
+      {
+        property: "og:description",
+        content:
+          "Verify FFL status and look up public license info by name, license number, or location.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -93,6 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

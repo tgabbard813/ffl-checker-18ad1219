@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FflLicenseIdRouteImport } from './routes/ffl.$licenseId'
 
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FflLicenseIdRoute = FflLicenseIdRouteImport.update({
+  id: '/ffl/$licenseId',
+  path: '/ffl/$licenseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/results': typeof ResultsRoute
+  '/ffl/$licenseId': typeof FflLicenseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/results': typeof ResultsRoute
+  '/ffl/$licenseId': typeof FflLicenseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/results': typeof ResultsRoute
+  '/ffl/$licenseId': typeof FflLicenseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/results'
+  fullPaths: '/' | '/results' | '/ffl/$licenseId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/results'
-  id: '__root__' | '/' | '/results'
+  to: '/' | '/results' | '/ffl/$licenseId'
+  id: '__root__' | '/' | '/results' | '/ffl/$licenseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ResultsRoute: typeof ResultsRoute
+  FflLicenseIdRoute: typeof FflLicenseIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ffl/$licenseId': {
+      id: '/ffl/$licenseId'
+      path: '/ffl/$licenseId'
+      fullPath: '/ffl/$licenseId'
+      preLoaderRoute: typeof FflLicenseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResultsRoute: ResultsRoute,
+  FflLicenseIdRoute: FflLicenseIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

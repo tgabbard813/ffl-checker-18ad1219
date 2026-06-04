@@ -117,19 +117,6 @@ function HomePage() {
         </form>
       </section>
 
-      {/* Disclaimer */}
-      <section className="mx-5 mb-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
-        <p className="text-xs leading-relaxed text-accent">
-          <span className="font-bold">Note:</span> Before searching, visit the{" "}
-          <Link to="/data" className="underline underline-offset-2 hover:opacity-80">
-            Data
-          </Link>{" "}
-          tab to download the latest ATF FFL CSV file and import it. Search
-          results depend on having current data loaded.
-        </p>
-      </section>
-
-      {/* Recent history */}
       <section className="border-t border-border px-5 py-6">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">

@@ -80,13 +80,6 @@ function AboutPage() {
         </p>
       </Section>
 
-      <Section title="Install on iPhone">
-        <p>
-          Tap Safari's Share button, then{" "}
-          <span className="font-semibold">Add to Home Screen</span> to install
-          this as a standalone app.
-        </p>
-      </Section>
 
       <Section title="Disclaimer">
         <p className="text-muted-foreground">

@@ -2,7 +2,11 @@
 // CSV into IndexedDB (see ffl-db.ts). If no import has been done yet, we
 // fall back to a small sample dataset so the app is usable out of the box.
 
-import { searchAll, getById, hasImportedData } from "./ffl-db";
+import {
+  searchBundled,
+  getBundledById,
+  hasBundledData,
+} from "./ffl-bundled";
 
 export type FflLicense = {
   id: string; // full license number, e.g. "1-54-059-01-4K-07721"

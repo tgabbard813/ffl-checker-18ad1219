@@ -117,16 +117,16 @@ export async function searchFfls(
 ): Promise<FflLicense[]> {
   const q = query.trim();
   if (!q) return [];
-  if (await hasImportedData()) {
-    return searchAll(q, mode);
+  if (await hasBundledData()) {
+    return searchBundled(q, mode);
   }
   return filterSample(q, mode);
 }
 
 export async function findFflById(id: string): Promise<FflLicense | undefined> {
   const norm = id.replace(/\s/g, "").toUpperCase();
-  if (await hasImportedData()) {
-    return getById(norm);
+  if (await hasBundledData()) {
+    return getBundledById(norm);
   }
   return SAMPLE_DATA.find((f) => f.id.toUpperCase() === norm);
 }

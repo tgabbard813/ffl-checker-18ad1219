@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { AppShell } from "@/components/app-shell";
 import { FflResultCard } from "@/components/ffl-result-card";
@@ -26,21 +27,27 @@ export const Route = createFileRoute("/results")({
 function ResultsPage() {
   const { q, mode } = Route.useSearch();
 
-  const results = useMemo(
-    () => searchFfls(q, mode as SearchMode),
-    [q, mode],
-  );
+  const { data: results, isLoading } = useQuery({
+    queryKey: ["ffl-search", q, mode],
+    queryFn: () => searchFfls(q, mode as SearchMode),
+    enabled: !!q,
+  });
 
-  // Record this search in local history.
+  // Record this search in local history once results are in.
   useEffect(() => {
-    if (!q) return;
-    addHistory({ query: q, mode: mode as SearchMode, resultCount: results.length });
-    // Only on q/mode change.
+    if (!q || !results) return;
+    addHistory({
+      query: q,
+      mode: mode as SearchMode,
+      resultCount: results.length,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, mode]);
+  }, [q, mode, results?.length]);
 
   const modeLabel =
     mode === "license" ? "License #" : mode === "nearby" ? "Nearby" : "Name";
+
+  const count = results?.length ?? 0;
 
   return (
     <AppShell>
@@ -75,18 +82,31 @@ function ResultsPage() {
             </h2>
           </div>
           <span className="shrink-0 rounded-md border border-border bg-surface px-2 py-1 font-mono text-[11px] text-muted-foreground">
-            {results.length} {results.length === 1 ? "match" : "matches"}
+            {isLoading ? "…" : `${count} ${count === 1 ? "match" : "matches"}`}
           </span>
         </div>
       </section>
 
       <section className="px-5 pb-8">
-        {results.length === 0 ? (
+        {isLoading ? (
+          <ul className="flex flex-col gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <li
+                key={i}
+                className="h-28 animate-pulse rounded-xl border border-border bg-surface"
+              />
+            ))}
+          </ul>
+        ) : count === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-surface/50 px-5 py-10 text-center">
             <p className="text-sm font-medium">No licenses found.</p>
             <p className="mt-2 text-sm text-muted-foreground">
               Double-check spelling, try fewer characters, or switch search
-              modes. This dataset is a public sample — see About for details.
+              modes. Make sure you've imported the latest ATF data under{" "}
+              <Link to="/data" className="text-accent underline-offset-2 hover:underline">
+                Data
+              </Link>
+              .
             </p>
             <Link
               to="/"
@@ -97,7 +117,7 @@ function ResultsPage() {
           </div>
         ) : (
           <ul className="flex flex-col gap-3">
-            {results.map((f) => (
+            {results!.map((f) => (
               <li key={f.id}>
                 <FflResultCard ffl={f} />
               </li>

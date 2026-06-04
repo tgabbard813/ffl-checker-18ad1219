@@ -3,8 +3,8 @@ import { AppShell } from "@/components/app-shell";
 import { findFflById } from "@/lib/ffl-data";
 
 export const Route = createFileRoute("/ffl/$licenseId")({
-  loader: ({ params }) => {
-    const ffl = findFflById(params.licenseId);
+  loader: async ({ params }) => {
+    const ffl = await findFflById(params.licenseId);
     if (!ffl) throw notFound();
     return { ffl };
   },

@@ -29,7 +29,7 @@ jobs:
 
       - name: Build
         env:
-          VITE_BASE_PATH: /ffl-checker/
+          VITE_BASE_PATH: /
         run: bun run build
 
       - name: SPA fallback (404.html = index.html)
